@@ -34,28 +34,25 @@ public class MainActivity extends AppCompatActivity {
         inputText = (EditText) findViewById(R.id.myInputText);
         outputText = (TextView) findViewById(R.id.myResponse);
         service = new AlchemyLanguage();
-        service.setApiKey("INSERT API_KEY");
+        service.setApiKey("511873582d6e1c27d0ed73ca26ea2f03c759bd48");
 
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               sendData();
-                Log.i("Hello", "onClick: finished?");
+                BackgroundTask bg = new BackgroundTask();
+                bg.execute(inputText.getText().toString());
+                Log.i("Hello", inputText.getText().toString());
             }
         });
 
-    }
-
-    public void sendData() {
-        BackgroundTask bg = new BackgroundTask();
-        bg.execute(inputText.toString());
     }
 
     private class BackgroundTask extends AsyncTask<String, Void, DocumentEmotion> {
         @Override
         protected DocumentEmotion doInBackground(String... params) {
             Map<String, Object> param = new HashMap<>();
-            param.put("text", params[0]);
+            param.put("text", params[0].toString());
+            Log.i("Text", "doInBackground: " + params[0].toString());
             DocumentEmotion emotion = service.getEmotion(param).execute();
 
             return emotion;
