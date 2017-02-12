@@ -13,6 +13,9 @@ import com.ibm.watson.developer_cloud.alchemy.v1.AlchemyLanguage;
 import com.ibm.watson.developer_cloud.alchemy.v1.model.DocumentEmotion;
 import com.ibm.watson.developer_cloud.alchemy.v1.model.DocumentSentiment;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText inputText;
     private TextView outputText;
     private HashMap<String, Double> emotions = new HashMap<>();
+    private HashMap<String, Integer> kV = new HashMap<>();
     private AlchemyLanguage service;
 
 
@@ -29,6 +33,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        kV.put("Anger", 0x1F620);
+        kV.put("Fear", 0x1F628);
+        kV.put("Disgust", 0x1F631);
+        kV.put("Joy", 0x1F603);
+        kV.put("Sadness", 0x1F61E);
+        kV.put("Neutral", 0x1F610);
 
         submit = (Button) findViewById(R.id.submitButton);
         inputText = (EditText) findViewById(R.id.myInputText);
@@ -45,6 +56,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void Emoji(String text) {
+        int unicode = kV.get(text);
+        String emoji = new String(Character.toChars(unicode));
+        outputText.setText(emoji);
+        outputText.setTextSize(100);
     }
 
     private class BackgroundTask extends AsyncTask<String, Void, DocumentEmotion> {
@@ -65,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
             emotions.put("Fear", result.getEmotion().getFear());
             emotions.put("Joy", result.getEmotion().getJoy());
             emotions.put("Sadness", result.getEmotion().getSadness());
+            emotions.put("Neutral", 0.0);
             Log.i("PostExecute", "Finished" + result.getEmotion().getAnger());
 
             String myText = "Anger" + result.getEmotion().getAnger() + "\n" +
@@ -73,9 +92,18 @@ public class MainActivity extends AppCompatActivity {
                     "Joy" + result.getEmotion().getJoy() + "\n" +
                     "Sadness" + result.getEmotion().getSadness();
 
-            Log.i("MyText: ", myText);
+            Log.i("MyText ", myText);
 
-            outputText.setText(myText);
+            Object[] keys = emotions.keySet().toArray();
+            String largest = "Neutral";
+            for(Object k : keys){
+                if (emotions.get((String)k) > emotions.get(largest)){
+                    largest = (String)k;
+                }
+            }
+
+            Emoji(largest);
+
         }
 
         @Override
